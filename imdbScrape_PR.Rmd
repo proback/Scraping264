@@ -1,0 +1,160 @@
+---
+title: 'Web scraping in R'
+output:
+  html_document: default
+  pdf_document:
+    fig_height: 3
+    fig_width: 4.5
+word_document: default
+---
+  
+```{r, setup, include=FALSE}
+library(tidyverse)
+library(stringr)
+library(httr)
+library(rvest)
+myapikey <- "4671c2d5"
+```
+
+##Getting data from websites
+
+#Option 1: APIs
+
+APIs are Application Programming Interfaces, instructions for how programs should interact with your software.  For our purposes of obtaining data, APIs exist where website developers make data nicely packaged for consumption.  The language HTTP (hypertext transfer protocol) underlies APIs, and the R package `httr()` was written to map closely to HTTP with R.
+
+Essentially you send a request to the website (server) where you want data from, and they send a response, which should contain the data (plus other stuff).
+
+This is a really quick introduction, just to get you started and show you what's possible.  For more information, these links can be somewhat helpful:
+
+- https://cran.r-project.org/web/packages/httr/vignettes/quickstart.html
+- https://towardsdatascience.com/functions-with-r-and-rvest-a-laymens-guide-acda42325a77
+- https://www.analyticsvidhya.com/blog/2017/03/beginners-guide-on-web-scraping-in-r-using-rvest-with-hands-on-knowledge/
+- https://www.rstudio.com/resources/webinars/extracting-data-from-the-web-part-1/
+- https://www.rstudio.com/resources/webinars/extracting-data-from-the-web-part-2/
+
+Plus this website with a list of public APIs:
+
+- https://github.com/toddmotto/public-apis
+
+Here's an example of getting data from a website that attempts to make imdb movie data available as an API.
+
+```{r}
+# library(httr)  # not needed since part of tidyverse
+
+# myapikey <-   # enter your API key for omdbapi.com
+
+# default is JSON = JavaScript Object Notation, 
+#   which is standard data format for APIs
+url <- str_c("http://www.omdbapi.com/?t=Coco&y=2017&plot=short&r=json&apikey=", myapikey)
+
+coco <- GET(url)   # coco holds response from server
+coco
+
+details <- content(coco, "parse")
+details
+details$Year
+
+```
+
+```{r}
+# Build a data set for a set of movies
+
+# Must figure out pattern in URL for obtaining different movies
+movies <- c("Coco", "Wonder+Woman", "Get+Out", 
+            "The+Greatest+Showman", "Thor:+Ragnarok")
+
+# Set up empty tibble
+omdb <- tibble(Title = character(), Rated = character(), Genre = character(),
+       Actors = character(), Metascore = double(), imdbRating = double(),
+       BoxOffice = double())
+
+# Use for loop to run through API request process 5 times,
+#   each time filling the next row in the tibble
+for(i in 1:5) {
+  url <- str_c("http://www.omdbapi.com/?t=",movies[i],
+               "&y=2017&plot=short&r=json&apikey=", myapikey)
+  onemovie <- GET(url)
+  details <- content(onemovie, "parse")
+  omdb[i,1] <- details$Title
+  omdb[i,2] <- details$Rated
+  omdb[i,3] <- details$Genre
+  omdb[i,4] <- details$Actors
+  omdb[i,5] <- parse_number(details$Metascore)
+  omdb[i,6] <- parse_number(details$imdbRating)
+  omdb[i,7] <- parse_number(details$BoxOffice)
+}
+
+omdb
+#  could use stringr functions to further organize this data
+```
+
+#Option 2: rvest for web scraping
+
+If you would like to assemble data from a website with no API, you can often acquire data using more brute force methods commonly called web scraping.  Typically, this involves finding content inside HTML (Hypertext markup language) code used for creating webpages and web applications and the CSS (Cascading style sheets) language for customizing the appearance of webpages.  
+
+There are typically three steps to scraping data with fucntions in the `rvest` library:
+
+1. `read_html()`.  Input the URL containing the data and turn the html code into an XML file (another markup format that's easier to work with).
+2. `html_nodes()`.  Extract specific nodes from the XML file by using the CSS path that leads to the content of interest.
+3. `html_text()`.  Extract content of interest from nodes.  Might also use `html_table()` etc.
+
+Here's an example of scraping movie data directly from imdb.com:
+
+```{r}
+library(rvest)
+
+# 1. Download the HTML and turn it into an XML file with read_html()
+coco <- read_html("https://www.imdb.com/title/tt2380307/")
+
+# 2. Extract specific nodes with html_nodes()
+cast <- html_nodes(coco, "span.itemprop")
+
+# 3. Extract content from nodes with html_text(), html_name(), 
+#    html_attrs(), html_children(), html_table()
+html_text(cast)
+cast
+html_attrs(cast)
+itemprop <- html_attr(cast, name = "itemprop")
+html_text(cast)[itemprop == "name"]    # still not perfect
+
+# selectorGadget
+# The following CSS derived with selectorGadget works better.
+cast2 <- html_nodes(coco, "#titleCast span.itemprop")
+html_text(cast2)
+
+cast3 <- html_nodes(coco, ".itemprop .itemprop")
+html_text(cast3)
+
+# Developer Tools
+cast4 <- html_nodes(coco, "td.itemprop")
+html_text(cast4)
+cast4a <- parse_character(html_text(cast4))
+str_sub(cast4a, 3, -3)
+```
+
+The last two CSS selectors used in `html_nodes()` were derived using *SelectorGadget* (go to selectorgadget.com to install in your browser).  You might also consider the fun CSS Selector tutorial at http://flukeout.github.io/.  
+
+*Developer Tools* in your browser can also be used to locate the desired content among the hierarchy of HTML tags.
+
+Another example, this time where the website already contains data in table form:
+
+```{r}
+mpls <- read_html("https://www.bestplaces.net/climate/city/minnesota/minneapolis")
+tables <- html_nodes(mpls, css = "table") 
+tables  # have to guesstimate which table contains climate info
+html_table(tables, header = TRUE, fill = TRUE)[[2]]
+```
+
+Your turn:
+
+1. Use the `httr` package to build a data set from the omdb API with a different set of movies and a different set of variables than we used earlier.  If you're feeling ambitious, tidy up the resulting data set.
+
+2. Use the `rvest` package to pull off data from imdb's top grossing films released in 2017 at https://www.imdb.com/search/title?year=2017&title_type=feature&sort=boxoffice_gross_us,desc.  In particular, pick off the "gross" for each film.  If you're feeling ambitious, pick off several variables and organize as a tibble.
+
+```{r}
+top50 <- read_html("https://www.imdb.com/search/title?year=2017&title_type=feature&sort=boxoffice_gross_us,desc")
+
+gross <- html_nodes(top50, ".ghost~ .text-muted+ span")
+
+parse_number(html_text(gross))
+```
