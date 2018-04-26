@@ -1,5 +1,6 @@
 ---
 title: 'Web scraping in R'
+subtitle: 'Tues April 24'
 output:
   html_document: default
   pdf_document:
