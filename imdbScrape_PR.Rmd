@@ -129,12 +129,12 @@ html_text(cast3)
 cast4 <- html_nodes(coco, "td.itemprop")
 html_text(cast4)
 cast4a <- parse_character(html_text(cast4))
-str_sub(cast4a, 3, -3)
+str_sub(cast4a, 3, -2)
 ```
 
-The last two CSS selectors used in `html_nodes()` were derived using *SelectorGadget* (go to selectorgadget.com to install in your browser).  You might also consider the fun CSS Selector tutorial at http://flukeout.github.io/.  
+The CSS selectors used in `html_nodes()` for cast2 and cast 3 were derived using *SelectorGadget* (go to selectorgadget.com to install in your browser).  You might also consider the fun CSS Selector tutorial at http://flukeout.github.io/.  
 
-*Developer Tools* in your browser can also be used to locate the desired content among the hierarchy of HTML tags.
+*Developer Tools* in your browser can also be used to locate the desired content among the hierarchy of HTML tags, as in cast4.
 
 Another example, this time where the website already contains data in table form:
 

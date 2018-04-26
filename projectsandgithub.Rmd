@@ -20,19 +20,19 @@ Want to manage your R work like an expert?  R experts keep all the files associa
 
 > *Beware*: when you complete the steps below, you will clear all the variables and data sets in your environment, all the plots under Plots, all the libraries you've loaded, and all the output in your console.  Actually, this is a good thing.  All of these things are temporary, while your R scripts and Rmd files are "real".  In fact, R4DS recommends never preserving your workspace between session (under Tools > Global Options) -- it might cause some short term pain, but it forces you to capture important interactions in your code.
 
-Let's create a project for this web scraping work.  You can start in the upper left under File > New Project, or in the upper right under Project: (None) > New Project.  Select New Directory > Empty Project.  Enter a directory name (like Scraping), make sure it's being placed in the right subdirectory (like your student folder) and hit Create Project.  You should now have a blank slate.
+Let's create a project for this web scraping work.  You can start in the upper left under File > New Project, or in the upper right under Project: (None) > New Project.  Select New Directory > Empty Project.  Enter a directory name (like Scraping264), make sure it's being placed in the right subdirectory (like your student folder), and hit Create Project.  You should now have a blank slate.
 
-First move imdbScrape.Rmd into your Scraping folder or make a copy in your Scraping folder.  Knit the file.  Note that there is still nothing in the Environment; when you knit, everything happens within that process.  Now go back into imdbScrape.Rmd and run the first few chunks by hand, until `omdb` is generated.  Then copy the line below into imdbScrape.Rmd (or simply copy this file into the Scraping folder) and run it to write `omdb` to your project folder:
+First move imdbScrape.Rmd (or the version you edited in class last time) into your Scraping264 folder or make a copy in your Scraping264 folder.  Knit the file.  Note that there is still nothing in the Environment; when you knit, everything happens within that process.  Now go back into imdbScrape.Rmd and run the first few chunks by hand, until `omdb` is generated.  Then copy the line below into imdbScrape.Rmd and run it to write `omdb.csv` to your project folder:
 
-```{r}
+```{r, eval = FALSE}
 write_csv(omdb, "omdb.csv")
 ```
 
-Not only should there be items in the Environment now, but `omdb.csv` should have been written to your Scraping folder.  To see the power of projects, select File > Quit Session once again, and this time select Scraping under Projects.  You will get a clean Environment and Console once again, but History shows the commands you ran by hand, active Rmd files appear in the Source panel, and Files contains the Rmd, html, and csv files produced by your last session.
+Not only should there be items in the Environment now, but `omdb.csv` should have been written to your Scraping264 folder.  To see the power of projects, select File > Quit Session once again, and this time select Scraping264 under Projects (or you can start a new R session and select File > Open Project).  You will get a clean Environment and Console once again, but History shows the commands you ran by hand, active Rmd files appear in the Source panel, and Files contains the Rmd, html, and csv files produced by your last session.
 
 ###Project Sharing
 
-Now let's see another advantage of using R projects - being able to share materials with collaborators.  To do this, go to File > Share Project.  Type a collaborators username and hit Add.  Your collaborator can work on your project by using the URL listed or simply by finding the project folder in their Home directory.  A project collaborator has the same permissions that you do on all project files, so you must coordinate efforts.  In addition, you can all see each other perform real-time editing, but anyone can save all changes at any time, so again you must coordinate.
+Now let's see another advantage of using R projects - being able to share materials with collaborators.  To do this, go to File > Share Project.  Type a collaborator's username (say your project partner) and hit Add.  Your collaborator can work on your project by using the URL listed or simply by finding the project folder in their Home directory.  A project collaborator has the same permissions that you do on all project files, so you must coordinate efforts.  In addition, you can all see each other perform real-time editing, but anyone can save all changes at any time, so again you must coordinate.  The advantage is that all of your joint work lives in one space accessible by the team working on it.
 
 For more information, see: https://wp.stolaf.edu/it/project-sharing/
 
@@ -40,3 +40,18 @@ For more information, see: https://wp.stolaf.edu/it/project-sharing/
 
 Another way to collaborate on an R project (or any coding project in general) is by using a version control system like GitHub.  With GitHub, you never have to save files as Final.docx, Final2.docx, Newfinal.docx, RealFinal.docx, nothisisreallyit.docx, etc.  You update code like .R and .Rmd and data files, recording descriptions of any changes.  Then if you ever want to go back to an earlier version, GitHub can facilitate that.  Or if you want to make your work public, others can see it and even suggest changes, but you are ultimately in control of any changes that get made.  And, like R projects, you can have multiple collaborators with access to the same set of files.
 
+Let's set up a GitHub repository for Homework 11.  Here are the steps:
+
+- Log into your GitHub account and click New Repository (repo).  Put something like "MSCS264-HW11" for your repository name, check Public (most of the time I create Private repositories and turn them public if I want later), and check Initialize with ReadMe.  Copy the URL once your repo has been created.
+- Go into the RStudio server and select File > New Project > Version Control > Git.  For the repository URL paste in the URL for the repository you just created.
+- Open HW11.Rmd.  Use File > Save As to save this into your new project folder (which will have the same name as your GitHub repo, say MSCS264-HW11).  Knit HW11.Rmd to produce HW11.pdf in your project folder.
+- In order to get ready to pass these changes to your GitHub repo, before the *first time* you follow the procedures below, you need to set things up so your RStudio server account can talk to your GitHub account:
+    + go to Tools > Shell
+    + at the $ prompt, type: git config --global user.email "YOUR EMAIL ADDRESS"
+    + at the $ prompt, type: git config --global user.name "YOUR FIRST AND LAST NAME"
+    + you may exit the Linux shell now
+- We now want to "push" the changes to MSCS264-HW11 to your GitHub repo (the changes - the addition of HW11.Rmd and HW11.pdf - have only been made on the RStudio server for now).  
+    + under the Git tab in the Environment panel, check the boxes in front of HW11.Rmd and HW11.pdf to "stage" your changes
+    + "commit" your changes (like saving a file locally) along with a message describing the changes you made.  GitHub guides you by by showing you old code (red) and new code (green), to make sure you approve of the changes.
+    + "push" your changes to GitHub (an external website).  You will be prompted to enter your GitHub username and password, which is a nice reminder that you are making changes beyond your laptop.  Check out your GitHub account to see new files in the MSCS264-HW11 repo!
+- Make a change (anything) to your HW11.Rmd file.  Now go back under the Git tab and "push" these new changes to GitHub.  You'll have to go through the same process of Stage, Commit, and Push, although this time you'll see only your newest changes in green when you Commit.
